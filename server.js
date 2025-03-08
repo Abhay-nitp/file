@@ -1,98 +1,8 @@
-// const express = require("express");
-// const app = express();
-// const port = 3000;
-// const userdata = require("./MOCK_DATA.json");
-
-// app.use(express.json()); // Middleware to parse JSON
 
 
 
-// app.get("/users", (req, res) => {
-//     const users = [
-//         { id: 1, name: "Alice" },
-//         { id: 2, name: "Bob" }
-//     ];
-//     res.json(users);
-// });
+require("dotenv").config(); // Load environment variables
 
-// app.post("/users", (req, res) => {
-//     const newUser = req.body;
-//     newUser.id = Math.floor(Math.random() * 1000); // Assign random ID
-//     res.status(201).json({ message: "User created", user: newUser });
-// });
-
-// app.put("/users/:id", (req, res) => {
-//     const userId = req.params.id;
-//     const updatedUser = req.body;
-//     updatedUser.id = userId;
-//     res.json({ message: "User updated", user: updatedUser });
-// });
-
-// app.patch("/users/:id", (req, res) => {
-//     const userId = req.params.id;
-//     const updates = req.body;
-//     res.json({ message: `User ${userId} partially updated`, updates });
-// });
-
-// app.delete("/users/:id", (req, res) => {
-//     const userId = req.params.id;
-//     res.json({ message: `User ${userId} deleted` });
-// });
-
-
-// app.listen(port, () => {
-//     console.log(`Server is running on http://localhost:${port}`);
-// });
-
-
-// // const express = require('express');
-// // const http = require('http');
-// // const { Server } = require('socket.io');
-// // const path = require('path');
-
-// // const app = express();
-// // const server = http.createServer(app);
-// // const io = new Server(server);
-
-// // app.use(express.static(path.join(__dirname, 'public')));
-
-// // io.on('connection', (socket) => {
-// //     console.log('A user connected');
-    
-// //     socket.on('chat message', (msg) => {
-// //         io.emit('chat message', msg);
-// //     });
-    
-// //     socket.on('disconnect', () => {
-// //         console.log('A user disconnected');
-// //     })
-// // });
-
-// // server.listen(3000, () => {
-// //     console.log('Server running on http://localhost:3000');
-// // });
-// // const http = require("http");
-// // const express = require("express");
-// // const socketIo = require("socket.io");
-
-// // const app = express();
-// // const server = http.createServer(app);
-// // const io = socketIo(server);
-
-// // app.get("/", (req, res) => {
-// //   res.sendFile(__dirname + "/index.html");
-// // });
-
-// // io.on("connection", (socket) => {
-// //   console.log("A user connected");
-// //   socket.on("disconnect", () => {
-// //     console.log("User disconnected");
-// //   });
-// // });
-
-// // server.listen(3000, () => {
-// //   console.log("Server is running at http://localhost:3000");
-// // });
 const express = require("express");
 const multer = require("multer");
 const cors = require("cors");
@@ -100,6 +10,9 @@ const path = require("path");
 const QRCode = require("qrcode");
 
 const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Middleware
 app.use(cors());
 app.use(express.static("uploads"));
 
@@ -117,8 +30,8 @@ app.post("/upload", upload.single("file"), async (req, res) => {
     if (!req.file) {
         return res.status(400).send("No file uploaded.");
     }
-    
-    const fileUrl = `http://${req.hostname}:3000/${req.file.originalname}`;
+
+    const fileUrl = `${process.env.BASE_URL || `http://${req.hostname}:${PORT}`}/${req.file.originalname}`;
 
     // Generate QR Code
     QRCode.toDataURL(fileUrl, (err, qrCode) => {
@@ -136,6 +49,6 @@ app.post("/upload", upload.single("file"), async (req, res) => {
 });
 
 // Start server
-app.listen(3000, () => {
-    console.log("Server running on http://<your-laptop-ip>:3000");
+app.listen(PORT, () => {
+    console.log(`Server running on ${process.env.BASE_URL || `http://localhost:${PORT}`}`);
 });
