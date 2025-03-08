@@ -1,37 +1,44 @@
 
 
 
-//require("dotenv").config(); // Load environment variables
-
+require("dotenv").config();
 const express = require("express");
-const multer = require("multer");
 const cors = require("cors");
-const path = require("path");
+const multer = require("multer");
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const QRCode = require("qrcode");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Middleware
 app.use(cors());
-app.use(express.static("uploads"));
+app.use(express.json());
 
-// Configure Multer to keep the original file name
-const storage = multer.diskStorage({
-    destination: "uploads/",
-    filename: (req, file, cb) => {
-        cb(null, file.originalname);
-    }
+// Configure Cloudinary
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
 });
-const upload = multer({ storage: storage });
 
-// Upload route
+// Configure Multer-Storage-Cloudinary
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: "uploads", // Cloudinary folder name
+        format: async (req, file) => "png", // Convert all files to PNG
+        public_id: (req, file) => file.originalname.split(".")[0], // Use original file name
+    },
+});
+const upload = multer({ storage });
+
+// Upload Route
 app.post("/upload", upload.single("file"), async (req, res) => {
     if (!req.file) {
-        return res.status(400).send("No file uploaded.");
+        return res.status(400).json({ error: "No file uploaded" });
     }
 
-    const fileUrl = `${process.env.BASE_URL || `http://${req.hostname}:${PORT}`}/${req.file.originalname}`;
+    const fileUrl = `${process.env.BASE_URL || `https://${req.hostname}`}/${req.file.originalname}`;
+
 
     // Generate QR Code
     QRCode.toDataURL(fileUrl, (err, qrCode) => {
@@ -47,13 +54,9 @@ app.post("/upload", upload.single("file"), async (req, res) => {
         `);
     });
 });
-app.use(express.static(path.join(__dirname, "public")));
 
-// Handle all other routes by serving index.html
-app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "index.html"));
-});
 // Start server
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server running on ${process.env.BASE_URL || `http://localhost:${PORT}`}`);
+    console.log(`Server running on http://localhost:${PORT}`);
 });
