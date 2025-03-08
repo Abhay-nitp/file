@@ -47,7 +47,12 @@ app.post("/upload", upload.single("file"), async (req, res) => {
         `);
     });
 });
+app.use(express.static(path.join(__dirname, "public")));
 
+// Handle all other routes by serving index.html
+app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 // Start server
 app.listen(PORT, () => {
     console.log(`Server running on ${process.env.BASE_URL || `http://localhost:${PORT}`}`);
