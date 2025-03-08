@@ -4,9 +4,9 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node_modules/.bin/electron .",
+    "start": "node server.js",
     "dev": "cd frontend && npm start",
-    "build": "cd frontend && npm run build && electron-builder",
+    "build": "cd frontend && npm run build",
     "pm2-start": "pm2 start server.js --name my-app",
     "pm2-stop": "pm2 stop my-app",
     "pm2-restart": "pm2 restart my-app",
