@@ -37,8 +37,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
         return res.status(400).json({ error: "No file uploaded" });
     }
 
-    const fileUrl = `${process.env.BASE_URL || `https://${req.hostname}`}/${req.file.originalname}`;
-
+    const fileUrl = req.file.path;
 
     // Generate QR Code
     QRCode.toDataURL(fileUrl, (err, qrCode) => {
